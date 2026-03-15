@@ -61,7 +61,7 @@ struct AIAssistant {
                 ["role": "user", "content": input]
             ],
             "temperature": 0.2,
-            "max_tokens": 512,
+            "max_tokens": 1024,
             "enable_thinking": false
         ]
 
