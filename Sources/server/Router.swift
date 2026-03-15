@@ -19,6 +19,7 @@ func configureRoutes(_ app: Application) throws {
                 name: result.name,
                 formula: result.formula,
                 latex: result.latex,
+                structural_latex: result.structural_latex,
                 markdown: result.markdown,
                 smiles: result.smiles,
                 reaction: result.reaction,
@@ -36,9 +37,9 @@ func configureRoutes(_ app: Application) throws {
             )
         } catch {
             let response = GenerateResponse(
-                name: nil, formula: nil, latex: nil, markdown: nil,
-                smiles: nil, reaction: nil, products: nil, explanation: nil,
-                type: "error", error_message: nil,
+                name: nil, formula: nil, latex: nil, structural_latex: nil,
+                markdown: nil, smiles: nil, reaction: nil, products: nil,
+                explanation: nil, type: "error", error_message: nil,
                 error: "Generation failed: \(error)"
             )
             let body = try JSONEncoder().encode(response)

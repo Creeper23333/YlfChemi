@@ -13,6 +13,7 @@ struct GenerateResponse: Content {
     let name: String?
     let formula: String?
     let latex: String?
+    let structural_latex: String?
     let markdown: String?
     let smiles: String?
     let reaction: String?

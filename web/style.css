@@ -139,26 +139,45 @@ body {
     border-top: 1px solid #e0e0e0;
     padding: 12px;
     background: #fff;
+}
+.structure-header {
     display: flex;
-    flex-direction: column;
     align-items: center;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    gap: 8px;
 }
 .structure-title {
     font-size: 11px;
     color: #888;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 8px;
-    align-self: flex-start;
+}
+.structure-controls {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.zoom-label {
+    font-size: 11px;
+    color: #888;
+}
+#zoom-slider {
+    width: 80px;
+    cursor: pointer;
+}
+#canvas-wrapper {
+    overflow: auto;
+    max-width: 100%;
+    text-align: center;
+    border: 1px solid #eee;
+    background: #fff;
 }
 #smiles-canvas {
-    display: block;
+    display: inline-block;
     background: #ffffff;
-    max-width: 100%;
-    width: 320px;
-    height: 260px;
-    margin: 0 auto;
-    border: 1px solid #eee;
+    transform-origin: center center;
 }
 
 /* ── Footer ──────────────────────────────── */

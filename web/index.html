@@ -57,9 +57,18 @@
                 <span class="output-value mono" id="out-markdown"></span>
                 <button class="btn-copy" onclick="copyText('out-markdown')">Copy</button>
             </div>
+            <div class="output-row" id="row-structural">
+                <span class="output-label">Struct LaTeX</span>
+                <span class="output-value mono" id="out-structural-latex"></span>
+                <button class="btn-copy" onclick="copyText('out-structural-latex')">Copy</button>
+            </div>
             <div class="output-row" id="row-rendered">
                 <span class="output-label">Rendered</span>
                 <span class="output-value" id="out-katex-render"></span>
+            </div>
+            <div class="output-row" id="row-structural-render">
+                <span class="output-label">Struct Render</span>
+                <span class="output-value" id="out-structural-render"></span>
             </div>
             <div class="output-row" id="row-reaction">
                 <span class="output-label">Reaction</span>
@@ -80,8 +89,18 @@
                 <span class="output-value" id="out-explanation"></span>
             </div>
             <div id="structure-box" class="hidden">
-                <div class="structure-title">Structure</div>
-                <canvas id="smiles-canvas" width="320" height="260"></canvas>
+                <div class="structure-header">
+                    <span class="structure-title">Structure</span>
+                    <div class="structure-controls">
+                        <label class="zoom-label">Zoom</label>
+                        <input type="range" id="zoom-slider" min="0.5" max="2" step="0.1" value="1" oninput="applyZoom(this.value)">
+                        <button class="btn-copy" onclick="copyCanvasImage()">Copy Image</button>
+                        <button class="btn-copy" onclick="downloadCanvas()">Download</button>
+                    </div>
+                </div>
+                <div id="canvas-wrapper">
+                    <canvas id="smiles-canvas" width="400" height="320"></canvas>
+                </div>
             </div>
         </div>
 

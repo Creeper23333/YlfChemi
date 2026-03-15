@@ -8,7 +8,6 @@ const SUB = { '0':'\u2080','1':'\u2081','2':'\u2082','3':'\u2083','4':'\u2084',
 
 function toSubscript(text) {
     if (!text) return '';
-    // Match element symbols followed by digits, convert ALL digits to subscript
     return text.replace(/([A-Za-z\)])(\d+)/g, (match, prefix, digits) => {
         return prefix + digits.split('').map(d => SUB[d] || d).join('');
     });
@@ -28,11 +27,11 @@ function copyText(id) {
 let smilesDrawer = null;
 try {
     smilesDrawer = new SmilesDrawer.Drawer({
-        width: 320, height: 260,
-        bondThickness: 1.5, bondLength: 30,
+        width: 400, height: 320,
+        bondThickness: 1.5, bondLength: 25,
         shortBondLength: 0.85,
-        fontSizeLarge: 11, fontSizeSmall: 7,
-        padding: 30,
+        fontSizeLarge: 10, fontSizeSmall: 6,
+        padding: 40,
         themes: {
             dark: {
                 C: '#1a1a1a', O: '#c0392b', N: '#2980b9',
@@ -40,7 +39,6 @@ try {
             }
         }
     });
-    console.log('SmilesDrawer initialized successfully');
 } catch (e) { console.warn('SmilesDrawer init error:', e); }
 
 // ── Enter key binding ───────────────────────
@@ -69,6 +67,9 @@ function renderSmiles(smiles) {
         return;
     }
     box.classList.remove('hidden');
+    // Reset zoom
+    document.getElementById('zoom-slider').value = 1;
+    canvas.style.transform = 'scale(1)';
     // Small delay to ensure canvas is visible before drawing
     setTimeout(() => {
         SmilesDrawer.parse(smiles, function(tree) {
@@ -84,6 +85,33 @@ function renderSmiles(smiles) {
     }, 50);
 }
 
+// ── Structure controls ──────────────────────
+function applyZoom(val) {
+    const canvas = document.getElementById('smiles-canvas');
+    canvas.style.transform = 'scale(' + val + ')';
+}
+
+function copyCanvasImage() {
+    const canvas = document.getElementById('smiles-canvas');
+    canvas.toBlob(function(blob) {
+        if (!blob) return;
+        const item = new ClipboardItem({ 'image/png': blob });
+        navigator.clipboard.write([item]).then(() => {
+            // Brief feedback
+            const btns = document.querySelectorAll('#structure-box .btn-copy');
+            if (btns[0]) { const orig = btns[0].textContent; btns[0].textContent = '✓'; setTimeout(() => btns[0].textContent = orig, 800); }
+        }).catch(err => console.error('Copy image failed:', err));
+    }, 'image/png');
+}
+
+function downloadCanvas() {
+    const canvas = document.getElementById('smiles-canvas');
+    const link = document.createElement('a');
+    link.download = 'structure.png';
+    link.href = canvas.toDataURL('image/png');
+    link.click();
+}
+
 // ════════════════════════════════════════════
 // MAIN GENERATE FUNCTION
 // ════════════════════════════════════════════
@@ -97,7 +125,6 @@ async function generate() {
     const errorDiv = document.getElementById('gen-error');
     const btn = document.getElementById('gen-btn');
 
-    // Show loading state
     loading.classList.remove('hidden');
     output.classList.add('hidden');
     errorDiv.classList.add('hidden');
@@ -117,14 +144,12 @@ async function generate() {
         btn.disabled = false;
         btn.textContent = 'Generate';
 
-        // System-level error
         if (data.error) {
             errorDiv.classList.remove('hidden');
             errorDiv.textContent = data.error;
             return;
         }
 
-        // Content-level error (non-chemistry input)
         if (data.type === 'error') {
             errorDiv.classList.remove('hidden');
             errorDiv.textContent = data.error_message || 'This does not appear to be a chemistry-related query.';
@@ -137,7 +162,6 @@ async function generate() {
         setField('row-name', 'out-name', data.name);
         setField('row-formula', 'out-formula', data.formula ? toSubscript(data.formula) : null);
 
-        // Type display
         const typeLabels = {
             'organic': 'Organic Compound',
             'inorganic': 'Inorganic Compound',
@@ -146,6 +170,10 @@ async function generate() {
         setField('row-type', 'out-type', typeLabels[data.type] || data.type);
 
         setField('row-latex', 'out-latex', data.latex);
+
+        // Structural LaTeX (organic only)
+        setField('row-structural', 'out-structural-latex', data.structural_latex);
+
         setField('row-markdown', 'out-markdown', data.markdown);
         setField('row-reaction', 'out-reaction', data.reaction ? toSubscript(data.reaction) : null);
         setField('row-products', 'out-products',
@@ -153,7 +181,7 @@ async function generate() {
         setField('row-smiles', 'out-smiles', data.smiles);
         setField('row-explanation', 'out-explanation', data.explanation);
 
-        // Render KaTeX
+        // Render KaTeX for molecular formula
         const katexRow = document.getElementById('row-rendered');
         const katexEl = document.getElementById('out-katex-render');
         const latexSrc = data.latex || data.markdown;
@@ -165,6 +193,19 @@ async function generate() {
             } catch(e) { katexEl.textContent = latexSrc; }
         } else {
             katexRow.style.display = 'none';
+        }
+
+        // Render KaTeX for structural formula
+        const structRenderRow = document.getElementById('row-structural-render');
+        const structRenderEl = document.getElementById('out-structural-render');
+        if (data.structural_latex) {
+            structRenderRow.style.display = '';
+            try {
+                const inner = data.structural_latex.replace(/^\$+/, '').replace(/\$+$/, '');
+                katex.render(inner, structRenderEl, { throwOnError: false, displayMode: false });
+            } catch(e) { structRenderEl.textContent = data.structural_latex; }
+        } else {
+            structRenderRow.style.display = 'none';
         }
 
         // Render SMILES structure for organic compounds

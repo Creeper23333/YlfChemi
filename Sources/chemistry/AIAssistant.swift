@@ -14,11 +14,11 @@ struct AIAssistant {
     /// System prompt that instructs the model to return structured chemistry JSON
     static let systemPrompt = """
     Chemistry generator. Return ONLY valid JSON with these fields:
-    name(string|null), formula(string|null), latex(string|null), markdown(string|null), smiles(string|null), reaction(string|null), products(string[]|[]), explanation(string|null), type("organic"|"inorganic"|"reaction"|"error"), error_message(string|null).
+    name(string|null), formula(string|null), latex(string|null), structural_latex(string|null), markdown(string|null), smiles(string|null), reaction(string|null), products(string[]|[]), explanation(string|null), type("organic"|"inorganic"|"reaction"|"error"), error_message(string|null).
 
-    Rules: Non-chemistry input→type="error". Organic→MUST include valid SMILES. LaTeX use \\\\mathrm{}, multi-digit subscripts use braces: C_{10}. No code fences. No comments.
+    Rules: Non-chemistry input→type="error". Organic→MUST include valid SMILES and structural_latex. latex=molecular formula LaTeX. structural_latex=structural formula in LaTeX using \\\\ce{} or chemfig-style notation showing bonds (e.g. C_6H_5COOH for benzoic acid). For inorganic, structural_latex=null. Multi-digit subscripts use braces: C_{10}. No code fences. No comments.
 
-    Example: {"name":"benzene","formula":"C6H6","latex":"\\\\mathrm{C_6H_6}","markdown":"$C_6H_6$","smiles":"c1ccccc1","reaction":null,"products":[],"explanation":"Aromatic hydrocarbon.","type":"organic","error_message":null}
+    Example: {"name":"benzene","formula":"C6H6","latex":"\\\\mathrm{C_6H_6}","structural_latex":"\\\\ce{C6H6}","markdown":"$C_6H_6$","smiles":"c1ccccc1","reaction":null,"products":[],"explanation":"Aromatic hydrocarbon.","type":"organic","error_message":null}
     """
 
     /// Response structure
@@ -26,6 +26,7 @@ struct AIAssistant {
         let name: String?
         let formula: String?
         let latex: String?
+        let structural_latex: String?
         let markdown: String?
         let smiles: String?
         let reaction: String?
