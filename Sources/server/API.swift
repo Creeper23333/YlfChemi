@@ -56,3 +56,21 @@ struct MoleculeResponse: Content {
     let formula: String
     let smiles: String
 }
+
+// ── AI Assistant ────────────────────────────
+
+struct AIRequest: Content {
+    let input: String
+}
+
+struct AIResponse: Content {
+    let name: String?
+    let formula: String?
+    let latex: String?
+    let markdown: String?
+    let smiles: String?
+    let reaction: String?
+    let products: [String]?
+    let explanation: String?
+    let error: String?
+}

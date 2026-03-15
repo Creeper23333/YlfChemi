@@ -112,4 +112,42 @@ func configureRoutes(_ app: Application) throws {
             body: .init(data: body)
         )
     }
+
+    // ── AI Chemistry Assistant ──────────────────
+    app.post("api", "ai") { req -> Response in
+        let input = try req.content.decode(AIRequest.self)
+
+        do {
+            let result = try await AIAssistant.query(input: input.input)
+            let response = AIResponse(
+                name: result.name,
+                formula: result.formula,
+                latex: result.latex,
+                markdown: result.markdown,
+                smiles: result.smiles,
+                reaction: result.reaction,
+                products: result.products,
+                explanation: result.explanation,
+                error: nil
+            )
+            let body = try JSONEncoder().encode(response)
+            return Response(
+                status: .ok,
+                headers: ["Content-Type": "application/json"],
+                body: .init(data: body)
+            )
+        } catch {
+            let response = AIResponse(
+                name: nil, formula: nil, latex: nil, markdown: nil,
+                smiles: nil, reaction: nil, products: nil, explanation: nil,
+                error: "AI error: \(error)"
+            )
+            let body = try JSONEncoder().encode(response)
+            return Response(
+                status: .ok,
+                headers: ["Content-Type": "application/json"],
+                body: .init(data: body)
+            )
+        }
+    }
 }

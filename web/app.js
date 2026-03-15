@@ -347,6 +347,110 @@ async function loadMoleculeList() {
     } catch (err) { console.warn('Could not load molecule list:', err); }
 }
 
+// ════════════════════════════════════════════
+// AI ASSISTANT
+// ════════════════════════════════════════════
+
+document.getElementById('ai-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') queryAI();
+});
+
+async function queryAI() {
+    const input = document.getElementById('ai-input').value.trim();
+    if (!input) return;
+
+    const loading = document.getElementById('ai-loading');
+    const output = document.getElementById('ai-output');
+    const errorDiv = document.getElementById('ai-error');
+    const btn = document.getElementById('ai-btn');
+
+    // Show loading state
+    loading.classList.remove('hidden');
+    output.classList.add('hidden');
+    errorDiv.classList.add('hidden');
+    btn.disabled = true;
+    btn.textContent = 'Thinking...';
+
+    try {
+        const res = await fetch('/api/ai', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ input })
+        });
+        const data = await res.json();
+
+        loading.classList.add('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Generate';
+
+        if (data.error) {
+            errorDiv.classList.remove('hidden');
+            errorDiv.textContent = data.error;
+            return;
+        }
+
+        output.classList.remove('hidden');
+
+        // Populate fields, hide empty ones
+        setAIField('ai-row-name', 'ai-name', data.name);
+        setAIField('ai-row-formula', 'ai-formula', data.formula ? toSubscript(data.formula) : null);
+        setAIField('ai-row-latex', 'ai-latex', data.latex);
+        setAIField('ai-row-markdown', 'ai-markdown', data.markdown);
+        setAIField('ai-row-reaction', 'ai-reaction', data.reaction ? toSubscript(data.reaction) : null);
+        setAIField('ai-row-products', 'ai-products',
+            data.products && data.products.length > 0 ? data.products.map(toSubscript).join(', ') : null);
+        setAIField('ai-row-explanation', 'ai-explanation', data.explanation);
+
+        // Render KaTeX if latex available
+        const katexRow = document.getElementById('ai-row-katex');
+        const katexEl = document.getElementById('ai-katex-render');
+        const latexSrc = data.latex || data.markdown;
+        if (latexSrc) {
+            katexRow.style.display = '';
+            try {
+                const inner = latexSrc.replace(/^\$+/, '').replace(/\$+$/, '');
+                katex.render(inner, katexEl, { throwOnError: false, displayMode: false });
+            } catch(e) { katexEl.textContent = latexSrc; }
+        } else {
+            katexRow.style.display = 'none';
+        }
+
+        // Render SMILES structure if available
+        const structBox = document.getElementById('ai-structure-box');
+        if (data.smiles) {
+            structBox.classList.remove('hidden');
+            renderAISmiles(data.smiles);
+        } else {
+            structBox.classList.add('hidden');
+        }
+
+    } catch (err) {
+        loading.classList.add('hidden');
+        btn.disabled = false;
+        btn.textContent = 'Generate';
+        errorDiv.classList.remove('hidden');
+        errorDiv.textContent = 'Request failed: ' + err.message;
+    }
+}
+
+function setAIField(rowId, valueId, value) {
+    const row = document.getElementById(rowId);
+    const el = document.getElementById(valueId);
+    if (value) {
+        row.style.display = '';
+        el.textContent = value;
+    } else {
+        row.style.display = 'none';
+    }
+}
+
+function renderAISmiles(smiles) {
+    const canvas = document.getElementById('ai-smiles-canvas');
+    if (!smilesDrawer) return;
+    SmilesDrawer.parse(smiles, tree => smilesDrawer.draw(tree, canvas, 'dark'),
+        err => console.error('AI SMILES parse error:', err));
+}
+
 // ── Init ────────────────────────────────────
 async function init() {
     try {

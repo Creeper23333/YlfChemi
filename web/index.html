@@ -19,6 +19,7 @@
         <button class="tab active" data-tab="formula">Formula Builder</button>
         <button class="tab" data-tab="reaction">Reaction Builder</button>
         <button class="tab" data-tab="organic">Organic Viewer</button>
+        <button class="tab" data-tab="ai">AI Assistant</button>
     </nav>
 
     <main id="workspace">
@@ -156,6 +157,62 @@
             </div>
 
             <div id="organic-list" class="molecule-list"></div>
+        </section>
+
+        <!-- ═══ AI Assistant Tab ═══ -->
+        <section id="tab-ai" class="tab-content">
+            <div class="tool-description">Describe a chemical formula or reaction in natural language. AI will interpret and generate structured output.</div>
+
+            <div class="input-row">
+                <input type="text" id="ai-input" placeholder="Describe chemical formula or reaction..." spellcheck="false">
+                <button class="btn-primary" id="ai-btn" onclick="queryAI()">Generate</button>
+            </div>
+
+            <div id="ai-loading" class="ai-loading hidden">Thinking...</div>
+
+            <div id="ai-output" class="output-panel hidden">
+                <div class="output-row" id="ai-row-name">
+                    <span class="output-label">Name</span>
+                    <span class="output-value" id="ai-name"></span>
+                </div>
+                <div class="output-row" id="ai-row-formula">
+                    <span class="output-label">Formula</span>
+                    <span class="output-value" id="ai-formula"></span>
+                    <button class="btn-copy" onclick="copyText('ai-formula')">Copy</button>
+                </div>
+                <div class="output-row" id="ai-row-latex">
+                    <span class="output-label">LaTeX</span>
+                    <span class="output-value mono" id="ai-latex"></span>
+                    <button class="btn-copy" onclick="copyText('ai-latex')">Copy</button>
+                </div>
+                <div class="output-row" id="ai-row-markdown">
+                    <span class="output-label">Markdown</span>
+                    <span class="output-value mono" id="ai-markdown"></span>
+                    <button class="btn-copy" onclick="copyText('ai-markdown')">Copy</button>
+                </div>
+                <div class="output-row" id="ai-row-reaction">
+                    <span class="output-label">Reaction</span>
+                    <span class="output-value" id="ai-reaction"></span>
+                    <button class="btn-copy" onclick="copyText('ai-reaction')">Copy</button>
+                </div>
+                <div class="output-row" id="ai-row-products">
+                    <span class="output-label">Products</span>
+                    <span class="output-value" id="ai-products"></span>
+                </div>
+                <div class="output-row" id="ai-row-katex">
+                    <span class="output-label">Rendered</span>
+                    <span class="output-value" id="ai-katex-render"></span>
+                </div>
+                <div class="output-row" id="ai-row-explanation">
+                    <span class="output-label">Explain</span>
+                    <span class="output-value" id="ai-explanation"></span>
+                </div>
+                <div id="ai-structure-box" class="hidden">
+                    <canvas id="ai-smiles-canvas" width="500" height="400"></canvas>
+                </div>
+            </div>
+
+            <div id="ai-error" class="result-error hidden"></div>
         </section>
 
     </main>
