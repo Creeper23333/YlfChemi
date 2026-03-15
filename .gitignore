@@ -6,3 +6,7 @@ xcuserdata/
 DerivedData/
 .DS_Store
 Package.resolved
+
+# Go build output
+YlfChemi
+YlfChemi.exe
