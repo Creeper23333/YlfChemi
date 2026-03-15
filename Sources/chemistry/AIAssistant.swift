@@ -87,7 +87,7 @@ struct AIAssistant {
         request.httpMethod = "POST"
         request.setValue("application/json", forHTTPHeaderField: "Content-Type")
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
-        request.timeoutInterval = 60
+        request.timeoutInterval = 120
 
         let body: [String: Any] = [
             "model": model,
@@ -96,7 +96,8 @@ struct AIAssistant {
                 ["role": "user", "content": input]
             ],
             "temperature": 0.3,
-            "max_tokens": 1024
+            "max_tokens": 1024,
+            "enable_thinking": false
         ]
 
         request.httpBody = try JSONSerialization.data(withJSONObject: body)
