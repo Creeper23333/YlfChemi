@@ -68,8 +68,25 @@ function renderSmiles(smiles) {
         return;
     }
     box.classList.remove('hidden');
-    SmilesDrawer.parse(smiles, tree => smilesDrawer.draw(tree, canvas, 'dark'),
-        err => { console.error('SMILES parse error:', err); box.classList.add('hidden'); });
+    // Delay drawing to ensure canvas is visible and has layout dimensions
+    setTimeout(() => {
+        try {
+            SmilesDrawer.parse(smiles, function(tree) {
+                smilesDrawer.draw(tree, canvas, 'dark');
+            }, function(err) {
+                console.error('SMILES parse error:', err);
+                // Show error on canvas
+                const ctx = canvas.getContext('2d');
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.font = '13px monospace';
+                ctx.fillStyle = '#c0392b';
+                ctx.fillText('Structure rendering failed: ' + err, 10, 30);
+            });
+        } catch(e) {
+            console.error('SmilesDrawer error:', e);
+            box.classList.add('hidden');
+        }
+    }, 100);
 }
 
 // ════════════════════════════════════════════

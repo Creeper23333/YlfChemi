@@ -115,20 +115,24 @@ body {
 /* ── Structure Box (SMILES canvas) ───────── */
 #structure-box {
     border-top: 1px solid #e0e0e0;
-    padding: 8px 12px 0;
+    padding: 12px;
+    background: #fff;
 }
 .structure-title {
     font-size: 11px;
     color: #888;
     text-transform: uppercase;
     letter-spacing: 1px;
-    margin-bottom: 4px;
+    margin-bottom: 8px;
 }
 #smiles-canvas {
     display: block;
-    background: #fff;
+    background: #ffffff;
     max-width: 100%;
+    width: 500px;
+    height: 400px;
     margin: 0;
+    border: 1px solid #eee;
 }
 
 /* ── Footer ──────────────────────────────── */
