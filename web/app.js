@@ -28,7 +28,7 @@ function copyText(id) {
 let smilesDrawer = null;
 try {
     smilesDrawer = new SmilesDrawer.Drawer({
-        width: 500, height: 400,
+        width: 320, height: 260,
         bondThickness: 1.5, bondLength: 30,
         shortBondLength: 0.85,
         fontSizeLarge: 11, fontSizeSmall: 7,
