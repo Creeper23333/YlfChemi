@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChemLazy — Lazy Chemistry Toolkit</title>
+    <link rel="stylesheet" href="/style.css">
+    <!-- KaTeX for math rendering -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <!-- SmilesDrawer for organic structure rendering -->
+    <script src="https://cdn.jsdelivr.net/npm/smiles-drawer@2.1.8/dist/smiles-drawer.min.js"></script>
+</head>
+<body>
+    <!-- Header -->
+    <header id="header">
+        <div class="header-title">ChemLazy</div>
+        <div class="header-sub">Lazy Chemistry Toolkit</div>
+    </header>
+
+    <!-- Tabs -->
+    <nav id="tabs">
+        <button class="tab active" data-tab="formula">Formula</button>
+        <button class="tab" data-tab="balance">Balance</button>
+        <button class="tab" data-tab="organic">Organic</button>
+    </nav>
+
+    <!-- Workspace -->
+    <main id="workspace">
+
+        <!-- Formula Tab -->
+        <section id="tab-formula" class="tab-content active">
+            <div class="tool-description">Generate inorganic chemical formulas using the valence cross method.</div>
+            <div class="input-row">
+                <input type="text" id="formula-input" placeholder="Na + Cl" spellcheck="false">
+                <button id="formula-btn" onclick="generateFormula()">Generate</button>
+            </div>
+            <div id="formula-result" class="result-box hidden"></div>
+        </section>
+
+        <!-- Balance Tab -->
+        <section id="tab-balance" class="tab-content">
+            <div class="tool-description">Balance chemical equations automatically using linear algebra.</div>
+            <div class="input-row">
+                <input type="text" id="balance-input" placeholder="Fe + O2 -> Fe2O3" spellcheck="false">
+                <button id="balance-btn" onclick="balanceEquation()">Balance</button>
+            </div>
+            <div id="balance-result" class="result-box hidden"></div>
+        </section>
+
+        <!-- Organic Tab -->
+        <section id="tab-organic" class="tab-content">
+            <div class="tool-description">Search organic molecules and render their structures.</div>
+            <div class="input-row">
+                <input type="text" id="organic-input" placeholder="benzene" spellcheck="false">
+                <button id="organic-btn" onclick="searchOrganic()">Search</button>
+            </div>
+            <div id="organic-result" class="result-box hidden">
+                <div id="organic-info"></div>
+                <canvas id="smiles-canvas" width="500" height="400"></canvas>
+            </div>
+            <div id="organic-list" class="molecule-list"></div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer id="footer">
+        <span>ChemLazy v1.0</span>
+        <span>·</span>
+        <span>localhost:5173</span>
+    </footer>
+
+    <script src="/app.js"></script>
+</body>
+</html>
