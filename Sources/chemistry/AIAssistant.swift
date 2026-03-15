@@ -9,7 +9,7 @@ struct AIAssistant {
 
     static let apiURL = "https://api.siliconflow.cn/v1/chat/completions"
     static let apiKey = "sk-rxdkwdcxdnzunjjjcczkpzgaybzyunbehakjshmlehlyoain"
-    static let model = "Qwen/Qwen3.5-397B-A17B"
+    static let model = "deepseek-ai/DeepSeek-V3.1-Terminus"
 
     /// System prompt that instructs the AI to return structured chemistry JSON
     static let systemPrompt = """
