@@ -11,7 +11,11 @@ import Foundation
 /// 5. Scale to smallest integer coefficients
 struct EquationBalancer {
 
-    static func balance(equation: String) -> BalanceResponse {
+    struct Result {
+        let balanced: String
+    }
+
+    static func balance(equation: String) -> Result {
         // Normalize arrow
         let normalized = equation
             .replacingOccurrences(of: "->", with: "→")
@@ -19,12 +23,12 @@ struct EquationBalancer {
             .replacingOccurrences(of: "=", with: "→")
 
         guard normalized.contains("→") else {
-            return BalanceResponse(balanced: "Error: use '->' to separate reactants and products")
+            return Result(balanced: "Error: use '->' to separate reactants and products")
         }
 
         let sides = normalized.components(separatedBy: "→").map { $0.trimmingCharacters(in: .whitespaces) }
         guard sides.count == 2 else {
-            return BalanceResponse(balanced: "Error: invalid equation format")
+            return Result(balanced: "Error: invalid equation format")
         }
 
         let reactants = parseCompounds(sides[0])
@@ -61,7 +65,7 @@ struct EquationBalancer {
         let coefficients = solveNullSpace(matrix: matrix, cols: numCompounds)
 
         guard let coeffs = coefficients else {
-            return BalanceResponse(balanced: "Error: could not balance equation")
+            return Result(balanced: "Error: could not balance equation")
         }
 
         // Build balanced equation string
@@ -81,7 +85,7 @@ struct EquationBalancer {
         }
 
         let result = reactantParts.joined(separator: " + ") + " → " + productParts.joined(separator: " + ")
-        return BalanceResponse(balanced: result)
+        return Result(balanced: result)
     }
 
     // ── Parsing ──────────────────────────────────────

@@ -37,6 +37,17 @@ struct OrganicDatabase {
         return MoleculeResponse(name: mol.name, formula: mol.formula, smiles: mol.smiles)
     }
 
+    /// Search by formula (case-insensitive exact match)
+    static func searchByFormula(formula: String) -> MoleculeResponse? {
+        let query = formula.trimmingCharacters(in: .whitespaces)
+        guard let mol = molecules.first(where: {
+            $0.formula.lowercased() == query.lowercased()
+        }) else {
+            return nil
+        }
+        return MoleculeResponse(name: mol.name, formula: mol.formula, smiles: mol.smiles)
+    }
+
     /// Return all molecules
     static func allMolecules() -> [MoleculeResponse] {
         return molecules.map { MoleculeResponse(name: $0.name, formula: $0.formula, smiles: $0.smiles) }
