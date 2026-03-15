@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ChemLazy — Lazy Chemistry Toolkit</title>
+    <title>YlfChemi — ChemiGenerator</title>
     <link rel="stylesheet" href="/style.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
     <script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
@@ -11,216 +11,79 @@
 </head>
 <body>
     <header id="header">
-        <div class="header-title">ChemLazy</div>
-        <div class="header-sub">Lazy Chemistry Toolkit</div>
+        <div class="header-title">YlfChemi</div>
+        <div class="header-sub">ChemiGenerator</div>
     </header>
 
-    <nav id="tabs">
-        <button class="tab active" data-tab="formula">Formula Builder</button>
-        <button class="tab" data-tab="reaction">Reaction Builder</button>
-        <button class="tab" data-tab="organic">Organic Viewer</button>
-        <button class="tab" data-tab="ai">AI Assistant</button>
-    </nav>
-
     <main id="workspace">
+        <div class="tool-description">Enter a chemical compound name, formula, or reaction description to generate structured output.</div>
 
-        <!-- ═══ Formula Builder Tab ═══ -->
-        <section id="tab-formula" class="tab-content active">
-            <div class="tool-description">Build chemical formulas with element blocks. Get multiple output formats.</div>
+        <div class="input-row">
+            <input type="text" id="gen-input" placeholder="e.g. benzene, H2SO4, iron burns in oxygen..." spellcheck="false">
+            <button class="btn-primary" id="gen-btn" onclick="generate()">Generate</button>
+        </div>
 
-            <div class="element-editor">
-                <div class="element-list" id="element-list"></div>
-                <button class="btn-secondary" onclick="addElement()">+ Add Element</button>
+        <div id="gen-loading" class="gen-loading hidden">Generating...</div>
+
+        <div id="gen-output" class="output-panel hidden">
+            <div class="output-row" id="row-name">
+                <span class="output-label">Name</span>
+                <span class="output-value" id="out-name"></span>
             </div>
-
-            <div class="preview-row">
-                <span class="preview-label">Preview:</span>
-                <span class="preview-value" id="formula-preview">—</span>
+            <div class="output-row" id="row-formula">
+                <span class="output-label">Formula</span>
+                <span class="output-value" id="out-formula"></span>
+                <button class="btn-copy" onclick="copyText('out-formula')">Copy</button>
             </div>
-
-            <button class="btn-primary" onclick="buildFormula()">Build Formula</button>
-
-            <div id="formula-output" class="output-panel hidden">
-                <div class="output-row">
-                    <span class="output-label">Display</span>
-                    <span class="output-value" id="out-display"></span>
-                    <button class="btn-copy" onclick="copyText('out-display')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">LaTeX</span>
-                    <span class="output-value mono" id="out-latex"></span>
-                    <button class="btn-copy" onclick="copyText('out-latex')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">Markdown</span>
-                    <span class="output-value mono" id="out-markdown"></span>
-                    <button class="btn-copy" onclick="copyText('out-markdown')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">KaTeX</span>
-                    <span class="output-value" id="out-katex-render"></span>
-                    <button class="btn-copy" onclick="copyText('out-katex-raw')">Copy</button>
-                    <span class="hidden" id="out-katex-raw"></span>
-                </div>
-                <div id="organic-detect" class="detect-box hidden">
-                    <span class="detect-label">Detected:</span>
-                    <span class="detect-value" id="detect-name"></span>
-                    <span class="detect-smiles" id="detect-smiles"></span>
-                </div>
+            <div class="output-row" id="row-type">
+                <span class="output-label">Type</span>
+                <span class="output-value" id="out-type"></span>
             </div>
-        </section>
-
-        <!-- ═══ Reaction Builder Tab ═══ -->
-        <section id="tab-reaction" class="tab-content">
-            <div class="tool-description">Build reactions with smart product suggestions. Balance equations automatically.</div>
-
-            <div class="reaction-editor">
-                <div class="reaction-side">
-                    <div class="side-label">Reactants</div>
-                    <div class="compound-list" id="reactant-list"></div>
-                    <button class="btn-secondary" onclick="addReactant()">+ Add Reactant</button>
-                </div>
-
-                <div class="reaction-arrow">→</div>
-
-                <div class="reaction-side">
-                    <div class="side-label">Products</div>
-                    <div class="compound-list" id="product-list"></div>
-                    <button class="btn-secondary" onclick="addProduct()">+ Add Product</button>
-                </div>
+            <div class="output-row" id="row-latex">
+                <span class="output-label">LaTeX</span>
+                <span class="output-value mono" id="out-latex"></span>
+                <button class="btn-copy" onclick="copyText('out-latex')">Copy</button>
             </div>
-
-            <div id="suggestions-panel" class="suggestions hidden">
-                <div class="suggestions-title">Suggested Products</div>
-                <div id="suggestions-list"></div>
+            <div class="output-row" id="row-markdown">
+                <span class="output-label">Markdown</span>
+                <span class="output-value mono" id="out-markdown"></span>
+                <button class="btn-copy" onclick="copyText('out-markdown')">Copy</button>
             </div>
-
-            <div class="reaction-actions">
-                <button class="btn-primary" onclick="suggestProducts()">Suggest</button>
-                <button class="btn-primary" onclick="balanceReaction()">Balance</button>
+            <div class="output-row" id="row-rendered">
+                <span class="output-label">Rendered</span>
+                <span class="output-value" id="out-katex-render"></span>
             </div>
-
-            <div class="input-row" style="margin-top:12px">
-                <input type="text" id="balance-input" placeholder="Or type equation: Fe + O2 -> Fe2O3" spellcheck="false">
-                <button class="btn-primary" onclick="balanceFromInput()">Balance</button>
+            <div class="output-row" id="row-reaction">
+                <span class="output-label">Reaction</span>
+                <span class="output-value" id="out-reaction"></span>
+                <button class="btn-copy" onclick="copyText('out-reaction')">Copy</button>
             </div>
-
-            <div id="reaction-output" class="output-panel hidden">
-                <div class="output-row">
-                    <span class="output-label">Balanced</span>
-                    <span class="output-value" id="rxn-balanced"></span>
-                    <button class="btn-copy" onclick="copyText('rxn-balanced')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">LaTeX</span>
-                    <span class="output-value mono" id="rxn-latex"></span>
-                    <button class="btn-copy" onclick="copyText('rxn-latex')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">Markdown</span>
-                    <span class="output-value mono" id="rxn-markdown"></span>
-                    <button class="btn-copy" onclick="copyText('rxn-markdown')">Copy</button>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">KaTeX</span>
-                    <span class="output-value" id="rxn-katex-render"></span>
-                    <button class="btn-copy" onclick="copyText('rxn-katex-raw')">Copy</button>
-                    <span class="hidden" id="rxn-katex-raw"></span>
-                </div>
+            <div class="output-row" id="row-products">
+                <span class="output-label">Products</span>
+                <span class="output-value" id="out-products"></span>
             </div>
-        </section>
-
-        <!-- ═══ Organic Viewer Tab ═══ -->
-        <section id="tab-organic" class="tab-content">
-            <div class="tool-description">Search organic molecules by name or formula. View structure diagrams.</div>
-
-            <div class="input-row">
-                <input type="text" id="organic-input" placeholder="benzene or C6H6" spellcheck="false">
-                <button class="btn-primary" onclick="searchOrganic()">Search</button>
+            <div class="output-row" id="row-smiles">
+                <span class="output-label">SMILES</span>
+                <span class="output-value mono" id="out-smiles"></span>
+                <button class="btn-copy" onclick="copyText('out-smiles')">Copy</button>
             </div>
-
-            <div id="organic-result" class="output-panel hidden">
-                <div class="output-row">
-                    <span class="output-label">Name</span>
-                    <span class="output-value" id="org-name"></span>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">Formula</span>
-                    <span class="output-value" id="org-formula"></span>
-                </div>
-                <div class="output-row">
-                    <span class="output-label">SMILES</span>
-                    <span class="output-value mono" id="org-smiles"></span>
-                    <button class="btn-copy" onclick="copyText('org-smiles')">Copy</button>
-                </div>
+            <div class="output-row" id="row-explanation">
+                <span class="output-label">Explain</span>
+                <span class="output-value" id="out-explanation"></span>
+            </div>
+            <div id="structure-box" class="hidden">
+                <div class="structure-title">Structure</div>
                 <canvas id="smiles-canvas" width="500" height="400"></canvas>
             </div>
+        </div>
 
-            <div id="organic-list" class="molecule-list"></div>
-        </section>
-
-        <!-- ═══ AI Assistant Tab ═══ -->
-        <section id="tab-ai" class="tab-content">
-            <div class="tool-description">Describe a chemical formula or reaction in natural language. AI will interpret and generate structured output.</div>
-
-            <div class="input-row">
-                <input type="text" id="ai-input" placeholder="Describe chemical formula or reaction..." spellcheck="false">
-                <button class="btn-primary" id="ai-btn" onclick="queryAI()">Generate</button>
-            </div>
-
-            <div id="ai-loading" class="ai-loading hidden">Thinking...</div>
-
-            <div id="ai-output" class="output-panel hidden">
-                <div class="output-row" id="ai-row-name">
-                    <span class="output-label">Name</span>
-                    <span class="output-value" id="ai-name"></span>
-                </div>
-                <div class="output-row" id="ai-row-formula">
-                    <span class="output-label">Formula</span>
-                    <span class="output-value" id="ai-formula"></span>
-                    <button class="btn-copy" onclick="copyText('ai-formula')">Copy</button>
-                </div>
-                <div class="output-row" id="ai-row-latex">
-                    <span class="output-label">LaTeX</span>
-                    <span class="output-value mono" id="ai-latex"></span>
-                    <button class="btn-copy" onclick="copyText('ai-latex')">Copy</button>
-                </div>
-                <div class="output-row" id="ai-row-markdown">
-                    <span class="output-label">Markdown</span>
-                    <span class="output-value mono" id="ai-markdown"></span>
-                    <button class="btn-copy" onclick="copyText('ai-markdown')">Copy</button>
-                </div>
-                <div class="output-row" id="ai-row-reaction">
-                    <span class="output-label">Reaction</span>
-                    <span class="output-value" id="ai-reaction"></span>
-                    <button class="btn-copy" onclick="copyText('ai-reaction')">Copy</button>
-                </div>
-                <div class="output-row" id="ai-row-products">
-                    <span class="output-label">Products</span>
-                    <span class="output-value" id="ai-products"></span>
-                </div>
-                <div class="output-row" id="ai-row-katex">
-                    <span class="output-label">Rendered</span>
-                    <span class="output-value" id="ai-katex-render"></span>
-                </div>
-                <div class="output-row" id="ai-row-explanation">
-                    <span class="output-label">Explain</span>
-                    <span class="output-value" id="ai-explanation"></span>
-                </div>
-                <div id="ai-structure-box" class="hidden">
-                    <canvas id="ai-smiles-canvas" width="500" height="400"></canvas>
-                </div>
-            </div>
-
-            <div id="ai-error" class="result-error hidden"></div>
-        </section>
-
+        <div id="gen-error" class="result-error hidden"></div>
     </main>
 
     <footer id="footer">
-        <span>ChemLazy v2.0</span>
+        <span>YlfChemi</span>
         <span>·</span>
-        <span>localhost:5173</span>
+        <span>Powered By Creeper.｜动力来自杨林丰</span>
     </footer>
 
     <script src="/app.js"></script>

@@ -28,28 +28,22 @@ struct OrganicDatabase {
     ]
 
     /// Search by name (case-insensitive, partial match)
-    static func search(name: String) -> MoleculeResponse? {
+    static func search(name: String) -> OrganicMolecule? {
         let query = name.lowercased().trimmingCharacters(in: .whitespaces)
-        guard let mol = molecules.first(where: { $0.name.lowercased() == query }) ??
-              molecules.first(where: { $0.name.lowercased().contains(query) }) else {
-            return nil
-        }
-        return MoleculeResponse(name: mol.name, formula: mol.formula, smiles: mol.smiles)
+        return molecules.first(where: { $0.name.lowercased() == query }) ??
+               molecules.first(where: { $0.name.lowercased().contains(query) })
     }
 
     /// Search by formula (case-insensitive exact match)
-    static func searchByFormula(formula: String) -> MoleculeResponse? {
+    static func searchByFormula(formula: String) -> OrganicMolecule? {
         let query = formula.trimmingCharacters(in: .whitespaces)
-        guard let mol = molecules.first(where: {
+        return molecules.first(where: {
             $0.formula.lowercased() == query.lowercased()
-        }) else {
-            return nil
-        }
-        return MoleculeResponse(name: mol.name, formula: mol.formula, smiles: mol.smiles)
+        })
     }
 
     /// Return all molecules
-    static func allMolecules() -> [MoleculeResponse] {
-        return molecules.map { MoleculeResponse(name: $0.name, formula: $0.formula, smiles: $0.smiles) }
+    static func allMolecules() -> [OrganicMolecule] {
+        return molecules
     }
 }

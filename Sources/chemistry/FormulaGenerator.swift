@@ -8,9 +8,13 @@ import Foundation
 /// 3. Simplify by dividing by GCD
 struct FormulaGenerator {
 
-    static func generate(elements: [String]) -> FormulaResponse {
+    struct Result {
+        let formula: String
+    }
+
+    static func generate(elements: [String]) -> Result {
         guard elements.count == 2 else {
-            return FormulaResponse(formula: "Error: provide exactly 2 elements")
+            return Result(formula: "Error: provide exactly 2 elements")
         }
 
         let sym1 = elements[0].trimmingCharacters(in: .whitespaces)
@@ -18,7 +22,7 @@ struct FormulaGenerator {
 
         guard let el1 = ElementDB.lookup(sym1),
               let el2 = ElementDB.lookup(sym2) else {
-            return FormulaResponse(formula: "Error: unknown element(s)")
+            return Result(formula: "Error: unknown element(s)")
         }
 
         // Determine which is the "cation" (metal/positive) and "anion" (non-metal/negative)
@@ -39,7 +43,7 @@ struct FormulaGenerator {
         formula += anion.symbol
         if sub2 > 1 { formula += "\(sub2)" }
 
-        return FormulaResponse(formula: formula)
+        return Result(formula: formula)
     }
 
     /// Order elements: metal (cation) first, non-metal (anion) second.
