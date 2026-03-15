@@ -11,9 +11,10 @@ func configureRoutes(_ app: Application) throws {
     // ── ChemiGenerator (single endpoint) ────────
     app.post("api", "generate") { req -> Response in
         let input = try req.content.decode(GenerateRequest.self)
+        let lang = input.language ?? "en"
 
         do {
-            let result = try await AIAssistant.query(input: input.input)
+            let result = try await AIAssistant.query(input: input.input, language: lang)
             let response = GenerateResponse(
                 name: result.name,
                 formula: result.formula,

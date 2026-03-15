@@ -116,7 +116,7 @@ struct AIAssistant {
     }
 
     /// Call the SiliconFlow API and return parsed chemistry JSON
-    static func query(input: String) async throws -> AIChemResponse {
+    static func query(input: String, language: String = "en") async throws -> AIChemResponse {
         guard let url = URL(string: apiURL) else {
             throw AIError.invalidURL
         }
@@ -127,10 +127,16 @@ struct AIAssistant {
         request.setValue("Bearer \(apiKey)", forHTTPHeaderField: "Authorization")
         request.timeoutInterval = 120
 
+        let langInstruction = language == "cn"
+            ? "\n\nIMPORTANT: The 'explanation' and 'name' fields MUST be written in Chinese (简体中文). The 'error_message' field must also be in Chinese."
+            : "\n\nIMPORTANT: The 'explanation' and 'name' fields MUST be written in English."
+
+        let fullPrompt = systemPrompt + langInstruction
+
         let body: [String: Any] = [
             "model": model,
             "messages": [
-                ["role": "system", "content": systemPrompt],
+                ["role": "system", "content": fullPrompt],
                 ["role": "user", "content": input]
             ],
             "temperature": 0.3,
@@ -169,7 +175,7 @@ struct AIAssistant {
         return chemResponse
     }
 
-    /// Extract JSON from a string that might contain markdown code fences
+    /// Extract JSON from a string that might contain markdown code fences, comments, or other noise
     private static func extractJSON(from text: String) -> String {
         var cleaned = text.trimmingCharacters(in: .whitespacesAndNewlines)
 
@@ -182,6 +188,59 @@ struct AIAssistant {
         if cleaned.hasSuffix("```") {
             cleaned = String(cleaned.dropLast(3))
         }
+        cleaned = cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
+
+        // Try to find JSON object boundaries { ... }
+        if let startIdx = cleaned.firstIndex(of: "{"),
+           let endIdx = cleaned.lastIndex(of: "}") {
+            cleaned = String(cleaned[startIdx...endIdx])
+        }
+
+        // Remove single-line comments (// ...) that break JSON parsing
+        let lines = cleaned.components(separatedBy: "\n")
+        let filteredLines = lines.map { line -> String in
+            // Remove // comments but not inside strings
+            var inString = false
+            var escaped = false
+            var result = ""
+            let chars = Array(line)
+            var i = 0
+            while i < chars.count {
+                let ch = chars[i]
+                if escaped {
+                    result.append(ch)
+                    escaped = false
+                    i += 1
+                    continue
+                }
+                if ch == "\\" && inString {
+                    result.append(ch)
+                    escaped = true
+                    i += 1
+                    continue
+                }
+                if ch == "\"" {
+                    inString = !inString
+                    result.append(ch)
+                    i += 1
+                    continue
+                }
+                if !inString && ch == "/" && i + 1 < chars.count && chars[i + 1] == "/" {
+                    break // rest of line is comment
+                }
+                result.append(ch)
+                i += 1
+            }
+            return result
+        }
+        cleaned = filteredLines.joined(separator: "\n")
+
+        // Remove trailing commas before } or ]
+        cleaned = cleaned.replacingOccurrences(
+            of: ",\\s*([}\\]])",
+            with: "$1",
+            options: .regularExpression
+        )
 
         return cleaned.trimmingCharacters(in: .whitespacesAndNewlines)
     }

@@ -6,6 +6,7 @@ import Vapor
 
 struct GenerateRequest: Content {
     let input: String
+    let language: String?  // "cn" or "en", defaults to "en"
 }
 
 struct GenerateResponse: Content {

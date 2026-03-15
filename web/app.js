@@ -26,21 +26,29 @@ function copyText(id) {
 
 // ── SmilesDrawer init ───────────────────────
 let smilesDrawer = null;
-try {
-    smilesDrawer = new SmilesDrawer.Drawer({
-        width: 500, height: 400,
-        bondThickness: 1.5, bondLength: 30,
-        shortBondLength: 0.85,
-        fontSizeLarge: 11, fontSizeSmall: 7,
-        padding: 30,
-        themes: {
-            dark: {
-                C: '#1a1a1a', O: '#c0392b', N: '#2980b9',
-                S: '#f39c12', H: '#555555', BACKGROUND: '#ffffff'
-            }
+const smilesOpts = {
+    width: 500, height: 400,
+    bondThickness: 1.5, bondLength: 30,
+    shortBondLength: 0.85,
+    fontSizeLarge: 11, fontSizeSmall: 7,
+    padding: 30,
+    themes: {
+        dark: {
+            C: '#1a1a1a', O: '#c0392b', N: '#2980b9',
+            S: '#f39c12', H: '#555555', BACKGROUND: '#ffffff'
         }
-    });
-} catch (e) { console.warn('SmilesDrawer not available:', e); }
+    }
+};
+try {
+    // SmilesDrawer v2.x API
+    if (typeof SmilesDrawer !== 'undefined') {
+        if (SmilesDrawer.Drawer) {
+            smilesDrawer = new SmilesDrawer.Drawer(smilesOpts);
+        } else if (SmilesDrawer.SmiDrawer) {
+            smilesDrawer = new SmilesDrawer.SmiDrawer(smilesOpts);
+        }
+    }
+} catch (e) { console.warn('SmilesDrawer init error:', e); }
 
 // ── Enter key binding ───────────────────────
 document.getElementById('gen-input').addEventListener('keydown', e => {
@@ -63,30 +71,45 @@ function setField(rowId, valueId, value) {
 function renderSmiles(smiles) {
     const canvas = document.getElementById('smiles-canvas');
     const box = document.getElementById('structure-box');
-    if (!smiles || !smilesDrawer) {
+    if (!smiles) {
         box.classList.add('hidden');
         return;
     }
+
     box.classList.remove('hidden');
+    console.log('Rendering SMILES:', smiles, 'smilesDrawer:', smilesDrawer);
+
     // Delay drawing to ensure canvas is visible and has layout dimensions
     setTimeout(() => {
         try {
-            SmilesDrawer.parse(smiles, function(tree) {
-                smilesDrawer.draw(tree, canvas, 'dark');
-            }, function(err) {
-                console.error('SMILES parse error:', err);
-                // Show error on canvas
-                const ctx = canvas.getContext('2d');
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.font = '13px monospace';
-                ctx.fillStyle = '#c0392b';
-                ctx.fillText('Structure rendering failed: ' + err, 10, 30);
-            });
+            if (smilesDrawer && typeof SmilesDrawer.parse === 'function') {
+                // SmilesDrawer v2.x with static parse
+                SmilesDrawer.parse(smiles, function(tree) {
+                    smilesDrawer.draw(tree, canvas, 'dark');
+                }, function(err) {
+                    console.error('SMILES parse error:', err);
+                    drawErrorOnCanvas(canvas, 'Parse error: ' + err);
+                });
+            } else if (smilesDrawer && typeof smilesDrawer.draw === 'function') {
+                // Try direct draw method
+                smilesDrawer.draw(smiles, canvas, 'dark');
+            } else {
+                // Fallback: show SMILES text on canvas
+                drawErrorOnCanvas(canvas, 'SmilesDrawer not loaded. SMILES: ' + smiles);
+            }
         } catch(e) {
             console.error('SmilesDrawer error:', e);
-            box.classList.add('hidden');
+            drawErrorOnCanvas(canvas, 'Render error: ' + e.message);
         }
-    }, 100);
+    }, 150);
+}
+
+function drawErrorOnCanvas(canvas, msg) {
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.font = '13px monospace';
+    ctx.fillStyle = '#c0392b';
+    ctx.fillText(msg, 10, 30);
 }
 
 // ════════════════════════════════════════════
@@ -110,10 +133,11 @@ async function generate() {
     btn.textContent = 'Generating...';
 
     try {
+        const language = document.getElementById('lang-select').value;
         const res = await fetch('/api/generate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ input })
+            body: JSON.stringify({ input, language })
         });
         const data = await res.json();
 

@@ -18,6 +18,14 @@
     <main id="workspace">
         <div class="tool-description">Enter a chemical compound name, formula, or reaction description to generate structured output.</div>
 
+        <div class="options-row">
+            <label class="lang-label">Language</label>
+            <select id="lang-select" class="lang-select">
+                <option value="cn">中文</option>
+                <option value="en">English</option>
+            </select>
+        </div>
+
         <div class="input-row">
             <input type="text" id="gen-input" placeholder="e.g. benzene, H2SO4, iron burns in oxygen..." spellcheck="false">
             <button class="btn-primary" id="gen-btn" onclick="generate()">Generate</button>
